@@ -1,5 +1,8 @@
 ![Logo](https://upload.wikimedia.org/wikipedia/commons/7/73/Ruby_logo.svg)
 
+# Atenção: 
+## Esse resumo foi baseado no livro conhecendo Ruby: aprenda de forma prática e divertida do Eustáquio Rangel
+
 # O que é Ruby?
 * Ruby é uma linguagem de programação interpretada multiparadigma, de tipagem
 dinâmica e forte, com gerenciamento de memória automático, originalmente pla-
@@ -792,3 +795,305 @@ dentro de um loop:
 3. return - sai do loop e do método onde o loop está contido
 4. redo - repete o loop do início, sem reavaliar a condição ou pegar o próximo elemento
 
+## Comentários Mágicos
+* Aqui fica uma dica de que podemos utilizar um "comentário mágico", que já vimos anteriormente,
+para policiar os nossos arquivos de código fonte. Ruby vai ler o seu código independente do
+bom alinhamento do código (não força igual Python), mas vamos ser legais e lembrar que tem
+pessoas lendo o seu código, além de computadores executando, beleza? Isso faz parte de uma
+filosofia/metodologia de Clean Code, que eu recomendo fortemente. Vamos ver um exemplo de
+código desalinhado que funciona:
+```
+v = 1
+if v == 1
+puts 'Valor é igual a 1!'
+end
+
+```
+* Saída do código:
+```
+Valor é igual a 1!
+
+```
+* Agora vamos inserir o comentário mágico _warn_indent: true_ e testar novamente:
+```
+# warn_indent: true
+v = 1
+if v == 1
+puts 'Valor é igual a 1!'
+end
+
+```
+* Saída do código:
+```
+not_aligned_working_warning.rb:6: warning: mismatched indentations at ’end’
+Valor é igual a 1!
+
+```
+# Atenção
+
+```
+Pudemos ver que recebemos um alerta sobre a indentação estar incorreta. Alguns outros co-
+mentários mágicos que temos:
+• # encoding: utf-8: encoding define o encoding do arquivo corrente para o especificado.
+No exemplo, foi especificado utf-8.
+• # frozen_string_literal: true: mostrado anteriormente, especifica que as Strings são
+todas congeladas, ou seja, não podem ser alteradas.
+• # typed: false: habilita ou não a checagem de tipos, nesse caso, desabilitando com false.
+A checagem de tipos pode ser feita utilizando ferramentas como Sorbet, Steep, TypeProf,
+etc.
+
+```
+
+## WHILE
+* Faça enquanto:
+```
+i = 0
+while i < 5
+puts i
+i += 1
+end
+
+```
+* Saída do código:
+```
+1
+2
+3
+4
+
+```
+
+## FOR
+* O for pode ser utilizado junto com um iterador para capturar todos os seus objetos e enviá-los
+para o loop (que nada mais é do que um bloco de código):
+```
+for i in (0..5)
+puts i
+end
+
+```
+* Saída do código:
+```
+0
+1
+2
+3
+4
+5
+
+```
+* Vamos aproveitar que é um loop bem simples e utilizar os comandos para interagir mostrados
+acima (mesmo que os exemplos pareçam as coisas mais inúteis e sem sentido do mundo - mas
+é para efeitos didáticos, gente!), menos o return onde precisaríamos de um método e ainda
+não chegamos lá. Vamos testar primeiro o break:
+
+```
+for i in (0..5)
+break if i == 3
+puts i
+end
+
+```
+* Saída do código:
+```
+0 
+1
+2
+
+```
+* Agora o next:
+```
+for i in (0..5)
+next if i == 3
+puts i
+end
+
+```
+* Saída do código:
+```
+0
+1
+2
+4
+5
+```
+* Agora o redo:
+```
+for i in (0..5)
+redo if i == 3
+puts i
+end
+```
+* Saída do código:
+```
+0
+1
+2
+for.rb:2: Interrupt
+from for.rb:1:in ‘each’
+from for.rb:1
+
+Se não interrompermos com Ctrl+C, esse código vai ficar funcionando para sempre, pois o
+redo avaliou o loop novamente mas sem ir para o próximo elemento do iterador.
+
+```
+## UNTIL
+* Faça até que!
+```
+i = 0
+until i==5
+puts i
+i += 1
+end
+
+```
+* Saída do programa
+```
+0
+1
+2
+3
+4
+
+```
+
+### Dica
+```
+Não temos os operadores ++ e -- em Ruby.
+Utilize += e -=.
+
+```
+
+## OPERADORES LÓGICOS
+* Temos operadores lógicos em Ruby em duas formas: !, && e || e not, and e or. Eles se
+diferenciam pela precedência: os primeiros tem precedência mais alta que os últimos sobre os
+operadores de atribuição.
+
+## PROCS e LAMBDAS
+
+* Procs são blocos de código que podem ser associados à uma variável, dessa maneira:
+```
+> vezes3 = Proc.new { |valor| valor * 3 }
+=> #<Proc:0xb7d959c4@(irb):1>
+> vezes3.call(3)
+=> 9
+> vezes3.call(4)
+=> 12
+> vezes3.call(5)
+=> 15
+
+```
+* Comportamento similar pode ser alcançado usando lambda:
+
+```
+> vezes5 = lambda { |valor| valor * 5 }
+=> #<Proc:0xb7d791d4@(irb):5>
+> vezes5.call(5)
+=> 25
+> vezes5.call(6)
+=> 30
+> vezes5.call(7)
+=> 35
+
+```
+* A primeira diferença, é a verificação de argumentos. Em lambdas a verificação é feita e gera
+uma exceção:
+```
+> pnew = Proc.new { |x, y| puts x + y }
+=> #<Proc:0x8fdaf7c@(irb):7>
+> lamb = lambda { |x, y| puts x + y }
+=> #<Proc:0x8fd7aac@(irb):8 (lambda)>
+> pnew.call(2, 4, 11)
+6
+=> nil
+> lamb.call(2, 4, 11)
+ArgumentError: wrong number of arguments (3 for 2)
+
+```
+* A segunda diferença é o jeito que elas retornam. O retorno de uma Proc retorna de dentro de
+onde ela está, como nesse caso:
+```
+def testando_proc
+p = Proc.new { return "Bum!" }
+p.call
+"Nunca imprime isso."
+end
+puts testando_proc
+
+```
+* Enquanto que em uma lambda, retorna para onde foi chamada:
+```
+def testando_lambda
+l = lambda { return "Oi!" }
+l.call
+"Imprima isso."
+end
+puts testando_lambda
+
+```
+* Temos suporte também à sintaxe "stabby proc/lambda", onde podemos utilizar -> indicando que
+vamos definir o corpo da lambda, opcionalmente indicando quais são seus parâmetros:
+```
+> p = ->(x, y) { x* y }
+> puts p.call(2,3)
+=> 6
+
+```
+* E também ao método curry, que decompõe uma lambda em uma série de outras lambdas.
+Por exemplo, podemos ter uma lambda que faça multiplicação:
+```
+> mult = ->(n1, n2) { n1 * n2 }
+=> #<Proc:0x8fef1fc@(irb):13 (lambda)>
+> mult.(2, 3)
+=> 6
+
+```
+* Definida, podemos utilizar o método curry no final e ter o seguinte resultado:
+```
+> mult = ->(n1, n2) { n1 * n2 }.curry
+=> #<Proc:0x8ffe4e0 (lambda)>
+> mult.(2).(3)
+=> 6
+
+```
+* Isso pode ser útil quando você deseja criar uma lambda a partir de outra, deixando um dos
+parâmetros fixo, como por exemplo:
+```
+> mult = ->(n1, n2) { n1 * n2 }.curry
+=> #<Proc:0x901dd40 (lambda)>
+> dobro = mult.(2)
+=> #<Proc:0x901c058 (lambda)>
+> triplo = mult.(3)
+=> #<Proc:0x9026904 (lambda)>
+> dobro.(8)
+=> 16
+> triplo.(9)
+=> 27
+
+```
+
+# Atenção:
+* Lambdas não mantém estado, são stateless, ou seja, a saída depende quase somente dos
+valores dos parâmetros de entrada. Digo quase somente pois elas também podem ser
+closures, como vamos ver mais a frente, e também podem depender de estado externo.
+
+## ITERADORES
+* Agora que conhecemos os tipos básicos de Ruby, podemos focar nossa atenção em uma ca-
+racterística bem interessante deles: muitos, senão todos, tem coleções ou características que
+podem ser percorridas por métodos iteradores.
+Um iterador percorre uma determinada coleção, que o envia o valor corrente, executando al-
+gum determinado procedimento, que em Ruby é enviado como um bloco de código e contém o
+módulo (hein?) Enumerable, que dá as funcionalidades de que ele precisa.
+Dos métodos mais comuns para percorrer uma coleção, temos each, que significa "cada", e
+que pode ser lido "para cada elemento da coleção do meu objeto, execute esse bloco de código",
+dessa maneira:
+
+```
+> [1, 2, 3, 4, 5].each { |e| puts "o array contém o número #{e}" }
+=> o array contém o número 1
+=> o array contém o número 2
+=> o array contém o número 3
+=> o array contém o número 4
+=> o array contém o número 5
+
+```
