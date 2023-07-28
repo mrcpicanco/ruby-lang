@@ -1097,3 +1097,7 @@ dessa maneira:
 => o array contém o número 5
 
 ```
+* Ou seja, para cada elemento do Array, foi executado o bloco - atenção aqui - passando o ele-
+mento corrente como parâmetro, recebido pelo bloco pela sintaxe |<parâmetro>|. Podemos
+ver que as instruções do nosso bloco, que no caso só tem uma linha, foram executadas com o
+valor recebido como parâmetro.
