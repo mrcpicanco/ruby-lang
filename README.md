@@ -1101,3 +1101,192 @@ dessa maneira:
 mento corrente como parâmetro, recebido pelo bloco pela sintaxe |<parâmetro>|. Podemos
 ver que as instruções do nosso bloco, que no caso só tem uma linha, foram executadas com o
 valor recebido como parâmetro.
+
+* Aqui percebemos uma característica de Ruby como uma linguagem que suporta também o pa-
+radigma declarativo, o que nesse caso deixa o código muito mais limpo e enxuto. Se fossemos
+utilizar o paradigma imperativo, que Ruby também suporta, seria feito dessa forma:
+
+```
+array = [1, 2, 3, 4, 5]
+count = 0
+while count <= 4
+puts "o array contém o número #{array[count]}"
+count += 1
+end
+
+```
+
+* Também funciona, mas comparado com o jeito declarativo, é mais feio que bater no vendedor de
+maçã do amor da pracinha. Como nos prezamos a escrever código bem legal (né?), fica mais
+tranquilo optarmos para o declarativo.
+Esse mesmo código declarativo pode ser ainda mais otimizado e refatorado para ficar mais de
+acordo com a sua finalidade. Não precisamos de um loop de 1 até 5? A maneira mais adequada
+seria criar uma Range com esse intervalo e executar nosso iterador nela:
+
+```
+> (1..5).each { |e| puts "a range contem o numero #{e}" }
+=> range contem o numero 1
+=> range contem o numero 2
+=> range contem o numero 3
+=> range contem o numero 4
+=> range contem o numero 5
+```
+
+* Inclusive, podemos também utilizar times em um Integer, que se comporta como uma coleção
+nesse caso, que começa em 0:
+
+```
+5.times { |e| puts "numero #{e}" }
+=> numero 0
+=> numero 1
+=> numero 2
+=> numero 3
+=> numero 4
+
+```
+* Um Array só faria sentido nesse caso se os seus elementos não seguissem uma ordem lógica
+que pode ser expressa em um intervalo de uma Range! Quaisquer sequências que podem ser
+representadas fazem sentido em usar uma Range. Se por acaso quiséssemos uma lista de
+números de 1 até 21, em intervalos de 2, podemos utilizar:
+
+```
+> (1..21).step(2).each { |e| puts "numero #{e}" }
+=> numero 1
+=> numero 3
+=> numero 5
+=> numero 7
+=> numero 9
+=> numero 11
+=> numero 13
+=> numero 15
+=> numero 17
+=> numero 19
+=> numero 21
+
+```
+* Em Rails utilizamos bastante a estrutura for <objeto> in <coleção>, da seguinte forma:
+
+```
+> col = %w(uma lista de Strings para mostrar o for)
+> for str in col
+>
+puts str
+> end
+=> uma
+=> lista
+=> de
+=> Strings
+=> para
+=> mostrar
+=> o
+=> for
+
+```
+
+## Selecionando elementos
+
+* Vamos supor que queremos selecionar alguns elementos que atendam alguma condição nos
+nossos objetos, por exemplo, selecionar apenas os números pares de uma coleção:
+
+```
+> (1..10).select { |e| e.even? }
+=> [2, 4, 6, 8, 10]
+
+```
+
+* Podemos utilizar ao invés de select, filter, que é apenas um alias que pode ficar mais
+confortável para quem está chegando agora vindo de outras linguagens.
+* Vamos testar com uma Hash:
+
+```
+{ 1 => "um", 2 => "dois", 3 => "tres" }.select { |chave, valor| valor.length > 2 }
+=> {2=>"dois", 3=>"tres"}
+
+```
+
+* Temos também o conceito de lazy evaluation. Reparem no método lazy antes do select:
+
+```
+natural_numbers = Enumerator.new do |yielder|
+number = 1
+loop do
+yielder.yield number
+number += 1
+end
+end
+p natural_numbers.lazy.select { |n| n.odd? }.take(5).to_a
+=> [1, 3, 5, 7, 9]
+
+```
+* Vamos ver esse tal de yield mais para frente. Por enquanto pensem que ele está passando
+aquele número para frente, para o Enumerator criado.
+
+```
+Se não utilizássemos lazy, íamos precisar de um CTRL+C, pois o conjunto de números naturais
+é infinito, e a seleção nunca pararia para que fossem pegos os 5 elementos.
+```
+
+## Selecionando os elementos que não atendem uma condição
+* O contrário da operação acima pode ser feito com reject:
+```
+> (0..10).reject {|valor| valor.even?}
+=> [1, 3, 5, 7, 9]
+
+```
+
+* Nada que a condição alterada do select também não faça.
+## Processando e alterando os elementos
+* Vamos alterar os elementos do objeto com o método map, primeiro transformando no dobro do
+valor de cada elemento:
+```
+> (0..10).map { |valor| valor * 2 }
+=> [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+
+```
+
+```
+Aqui podemos ver que temos alguns conceitos matemáticos envolvidos. Essa operação
+acima poderia ser descrita como dobrar cada elemento da seleção dos elementos de um
+conjunto (que é a Range) que fazem parte dos números naturais representados aqui pelo
+símbolo N.
+Os números naturais são considerados sendo os números inteiros positivos e utilizamos
+aqui o número 1 em sobreescrito para deixar claro que o número 0 não está incluído no
+conjunto, agora o definindo como os números inteiros, selecionando os números menores
+ou iguais a 10:
+S = {2.x|x ∈ N1 , x ≤ 10}
+Podemos deixar mais explícito que queremos os inteiros utilizando Z:
+S = {2.x|x ∈ Z, x ≤ 10}
+Esse tipo de operação é conhecido geralmente em matemática como notação de definição
+de conjunto (set builder, set comprehension), e em linguagens de programação como com-
+preensão de lista(list comprehension) a , sendo:
+• 2.x = função de saída
+• x = variável
+• Z = conjunto de entrada
+• x ≤ 10 = predicado
+a https://pt.wikipedia.org/wiki/Compreens%C3%A3o_de_lista
+
+```
+
+* E agora transformando os elementos com um bloco customizado:
+
+```
+> %w(um dois tres quatro cinco seis sete oito nove dez).map { |valor| "numero #{valor}"
+}
+=> ["numero um", "numero dois", "numero tres", "numero quatro",
+%"numero cinco", "numero seis", "numero sete", "numero oito", "numero nove",
+%"numero dez"]
+> { 1 => "um", 2 => "dois", 3 => "tres" }.map { |chave, valor| "numero #{valor}" }
+=> ["numero um", "numero dois", "numero tres"]
+
+```
+## Detectando condições em todos os elementos
+* Vamos supor que desejamos detectar se todos os elementos da coleção atendem uma determi-
+nada condição com o método all?:
+
+```
+> (0..10).all? { |valor| valor > 1 }
+=> false
+> (0..10).all? { |valor| valor > 0 }
+=> false
+
+```
