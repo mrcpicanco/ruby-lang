@@ -175,7 +175,7 @@ o seu nome.
 
 ```
 
-###Expressões Regulares
+### Expressões Regulares
 * Outra coisa muito útil em Ruby é o suporte para expressões regulares (regexps). Elas podem ser
 facilmente criadas das seguintes maneiras:
 
@@ -511,3 +511,284 @@ puts "Ocorreu um erro do tipo #{exception.class}: #{exception}"
 end
 
 ```
+* Saída do programa
+
+```
+$ ruby exc2.rb
+Ocorreu um erro do tipo TypeError: String can’t be coerced into Integer
+
+```
+* Podemos utilizar _ensure_ como um bloco para ser executado depois de todos os _rescues_:
+
+```
+begin
+numero = 1
+string = "oi"
+numero + string
+rescue => exception
+puts "Ocorreu um erro do tipo #{exception.class}: #{exception}"
+ensure
+puts "Lascou tudo."
+end
+puts "Fim de programa."
+
+```
+* Saída do programa
+
+```
+$ ruby exc3.rb
+Ocorreu um erro do tipo TypeError: String can’t be coerced into Integer
+Lascou tudo.
+Fim de programa.
+
+```
+
+### Utilizando catch e throw
+* Também podemos utilizar catch e throw para terminar o processamento quando nada mais é
+necessário, indicando através de um Symbol para onde o controle do código deve ser transferido
+(opcionalmente com um valor), indicado com catch, usando throw:
+
+```
+def get_input
+puts "Digite algo (número termina):"
+resp = gets
+throw :end_of_response, resp if resp.chomp.match? /^\d+$/
+resp
+end
+
+num = catch(:end_of_response) do
+while true
+get_input
+end
+end
+puts "Terminado com: #{num}"
+
+```
+
+* Rodando o programa
+```
+$ ruby catchthrow.rb
+Digite algo (número termina):
+oi
+Digite algo (número termina):
+123
+Terminado com: 123
+
+```
+
+## Estruturas de controle
+### Condicionais
+## IF 
+* É importante notar que tudo em Ruby acaba no fim – end – e vamos ver isso acontecendo bastante com nossas estruturas de controle. Vamos começar vendo nosso velho amigo if:
+
+```
+i = 10
+if i == 10
+puts "i igual 10"
+else
+puts "i diferente de 10"
+end
+
+```
+* Também temos mais um nível de teste no if, o _elsif_:
+
+```
+i = 10
+if i > 10
+puts "maior que 10"
+elsif i == 10
+puts "igual a 10"
+else
+puts "menor que 10"
+end
+
+```
+
+* Podemos capturar a saída do teste diretamente apontando para uma variável para ele:
+```
+i = 10
+result =
+if i > 10
+"maior que 10"
+elsif i == 10
+"igual a 10"
+else
+"menor que 10"
+end
+result
+
+```
+
+## UNLESS
+* O unless é a forma negativa do if, e como qualquer teste negativo, pode trazer alguma con-
+fusão no jeito de pensar sobre eles. Particularmente gosto de evitar testes negativos quando
+pode-se fazer um bom teste positivo.
+
+## CASE
+* Podemos fazer o case fazer umas comparações interessantes; Vamos ver como testar com _Ranges_:
+```
+i = 10
+case i
+when 0..5
+puts "entre 0 e 5"
+when 6..10
+puts "entre 6 e 10"
+else
+puts "hein?"
+end
+
+```
+
+## SPLAT
+* Convém dedicarmos um tempo para explicar um operador bem útil em Ruby, que é o operador
+splat (asterisco, *)
+Quando usamos o splat na frente do nome de uma variável que se comporta como uma cole-
+ção, ele "explode"os seus valores, retornando os elementos individuais:
+
+```
+> array = %w(um dois tres)
+=> ["um", "dois", "tres"]
+> p *array
+=> "um"
+=> "dois"
+=> "tres"
+=> nil
+> hash = { :um => 1, :dois => 2, :tres => 3 }
+=> { :um => 1, :dois => 2, :tres => 3 }
+> p *hash
+=> [:tres, 3]
+=> [:um, 1]
+=> [:dois, 2]
+=> nil
+
+```
+* E quando utilizamos antes de um nome de uma variável, ele "suga"os valores excedentes, agindo
+como um "buraco negro". Testando com uma atribuição simples:
+
+```
+> array = [1, 2, 3, 4]
+=> [1, 2, 3, 4]
+> a, b, *c = *array
+=> [1, 2, 3, 4]
+> a
+=> 1
+> b
+=> 2
+> c
+=> [3, 4]
+
+```
+
+## Pattern Matching
+* O recurso de pattern matching foi apresentado por Kazuki Tsujimoto na RubyKaigi 2019, onde
+foi utilizada uma definição de "Learn You a Haskell for Great Good!", de Miran Lipovaca:
+```
+"A correspondência de padrões (pattern matching consiste em especificar pa-
+drões aos quais alguns dados devem estar em conformidade e em seguida, veri-
+ficar se isso ocorre e desconstruir os dados de acordo com esses padrões."
+
+```
+
+* Vamos ver um exemplo utilizando o exemplo de atribuição com o operador splat como visto
+acima. Podemos utilizar uma sintaxe recente para fazer esse tipo de operação, que é a one line
+pattern matching:
+
+```
+> [1, 2, 3, 4] => [a, b, *c]
+=> nil
+> a
+=> 1
+> b
+=> 2
+> c
+=> [3, 4]
+
+```
+* Esse tipo de operação pode ser chamada de desestruturação. Isso é útil para operações
+com o splat, como por exemplo, tentando utilizar uma Hash no lado direito do splat:
+```
+> hash = { a: 1, b: 2, c: 3, d: 4 }
+=> {:a=>1, :b=>2, :c=>3, :d=>4}
+a, b, *c = *hash
+=> [[:a, 1], [:b, 2], [:c, 3], [:d, 4]]
+> a
+=> [:a, 1]
+> b
+=> [:b, 2]
+3> c
+=> [[:c, 3], [:d, 4]]
+
+```
+* Nesse caso, cada variável ficou com um par de chave e valor da Hash. Utilizando o one-line
+pattern matching, podemos fazer:
+```
+> hash => { a:, b:, **c }
+=> nil
+> a
+=> 1
+> b
+=> 2
+> c
+=> {:c=>3, :d=>4}
+
+```
+* Vejam que foram criadas variáveis cujos nomes são as chaves da Hash utilizada do lado direito
+do pattern matching. Importante notar que as chaves tem que "casar"com o que foi definido
+do lado direito, senão vamos ter um erro de matching:
+
+```
+> hash => { a:, b:, e:}
+key not found: :e (NoMatchingPatternError)
+
+```
+* Vamos utilizar o nosso amigo case para algo como:
+```
+valores = [1, 2, 3]
+case valores
+in [a]
+puts "O valor é #{a}"
+in [a, b]
+puts "Os valores são: #{a} e #{b}"
+in [a, b, c]
+puts "Os valores são: #{a}, #{b} e #{c}"
+end
+
+```
+
+* Saída do Programa
+```
+Os valores são: 1, 2 e 3
+
+```
+* Reparem no primeiro case que temos 3 elementos Array, que combinou com o in que tem as
+três variáveis a, b e c.
+Reparem que conseguimos além de fazer o "encaixe", também identificar valores dentro do
+Array:
+
+```
+traducoes = [:br, 'Bom dia', :en, 'Good morning']
+case traducoes
+in [:br, texto_br, :es, texto_es]
+puts "'#{texto_br}' em Espanhol é '#{texto_es}'"
+in [:br, texto_br, :en, texto_en]
+puts "'#{texto_br}' em Inglês é '#{texto_en}'"
+else
+puts "Sem tradução"
+end
+
+```
+
+* Rodando o programa
+
+```
+’Bom dia’ em Inglês é ’Good morning’
+
+```
+## LOOPS
+* Antes de vermos os loops, vamos deixar anotado que temos algumas maneiras de interagir
+dentro de um loop:
+1. break - sai do loop
+2. next - vai para a próxima iteração
+3. return - sai do loop e do método onde o loop está contido
+4. redo - repete o loop do início, sem reavaliar a condição ou pegar o próximo elemento
+
