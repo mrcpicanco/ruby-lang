@@ -1263,7 +1263,6 @@ preensão de lista(list comprehension) a , sendo:
 • x = variável
 • Z = conjunto de entrada
 • x ≤ 10 = predicado
-a https://pt.wikipedia.org/wiki/Compreens%C3%A3o_de_lista
 
 ```
 
@@ -1290,3 +1289,265 @@ nada condição com o método all?:
 => false
 
 ```
+## Detectando se algum elemento atende uma condição
+* Vamos testar se algum elemento atende uma determinada condição com o método any?:
+```
+> (0..10).any? { |valor| valor == 3 }
+=> true
+> (0..10).any? { |valor| valor == 30 }
+=> false
+
+```
+* Nesse caso específico, poderíamos ter escrito dessa forma também:
+
+```
+> (0..10).include?(3)
+=> true
+> (0..10).include?(30)
+=> false
+
+```
+* Apesar da facilidade com um teste simples, o método any? é muito prático no caso de procu-
+rarmos, por exemplo, um determinado objeto com um determinado valor de retorno em algum de
+seus métodos.
+
+## Detectar e retornar o primeiro elemento que atende uma condição
+
+* Se além de detectar quisermos retornar o elemento que atende à uma condição, podemos utilizar
+o método detect:
+
+```
+> (0..10).detect {|valor| valor > 0 && valor % 4 == 0}
+=> 4
+
+```
+## Detrectando os valores máximo e mínimo
+* Podemos usar max e min para isso:
+
+```
+> (0..10).max
+=> 10
+> (0..10).min
+=> 0
+
+```
+* É interessante notar que podemos passar um bloco onde serão comparados os valores para
+teste através do operador <=> (conhecido por "navinha"):
+
+```
+> %w(joao maria antonio).max { |elemento1, elemento2| elemento1.length <=> elemento2.
+length }
+=> "antonio"
+> %w(joao maria antonio).min { |elemento1, elemento2| elemento1.length <=> elemento2.
+length }
+=> "joao"
+
+```
+
+```
+Dica
+O operador <=> compara o objeto da esquerda com o objeto da direita e retorna -1 se o
+objeto à esquerda for menor, 0 se for igual e 1 se for maior do que o da direita:
+1 <=> 2 => -1
+1 <=> 1 => 0
+1 <=> -1 => 1
+
+```
+* Olhem que interessante comparando valores de Hashes:
+```
+> { joao: 33, maria: 30, antonio: 25 }.max { |elemento1, elemento2| elemento1[1] <=>
+elemento2[1] }
+=> [:joao, 33]
+> { joao: 33, maria: 30, antonio: 25 }.min { |elemento1, elemento2| elemento1[1] <=>
+elemento2[1] }
+=> [:antonio, 25]
+
+```
+
+## Acumulando os elementos
+* Podemos acumular os elementos com inject, onde vão ser passados um valor acumulador e
+o valor corrente pego do iterador. Se desejarmos saber qual é a soma de todos os valores da
+nossa Range:
+
+```
+> (0..10).inject { |soma, valor| soma + valor }
+=> 55
+
+```
+* Podemos passar também um valor inicial:
+```
+> (0..10).inject(100) { |soma, valor| soma + valor }
+=> 155
+```
+## Dividir a coleção em dois Arrays obedecendo uma condição
+
+```
+> (0..10).partition { |valor| valor.even? }
+=> [[0, 2, 4, 6, 8, 10], [1, 3, 5, 7, 9]]
+
+```
+* E se tentarmos utilizar o método even? enviando como símbolo, como demonstrado como :+
+acima?
+
+```
+> (0..10).partition(:even?)
+=> ArgumentError (wrong number of arguments (given 1, expected 0))
+
+```
+
+* Ops, ocorreu um erro. A razão é que o método partition espera que seja enviado um bloco de
+código e não um método. Para fazer a conversão, podemos utilizar o caracter & antes do símbolo,
+o que vai criar um bloco de código que vai ter o teste com o método especificado:
+
+```
+> (0..10).partition(&:even?)
+=> [[0, 2, 4, 6, 8, 10], [1, 3, 5, 7, 9]]
+
+```
+## Percorrendo os elementos com os índices
+
+```
+> (0..10).each_with_index { |item, indice| puts "#{item} indice #{indice}" }
+=> 0 indice 0
+=> 1 indice 1
+=> 2 indice 2
+=> 3 indice 3
+=> 4 indice 4
+=> 5 indice 5
+=> 6 indice 6
+=> 7 indice 7
+=> 8 indice 8
+=> 9 indice 9
+=> 10 indice 10
+
+```
+## Ordenando uma coleção
+```
+> %w[joao maria antonio].sort
+=> ["antonio", "joao", "maria"]
+
+```
+* Podemos ordenar de acordo com algum critério específico, passando um bloco e usando sort_by:
+
+```
+> %w[antonio maria joao].sort_by { |nome| nome.length }
+=> ["joao", "maria", "antonio"]
+
+```
+## Combinando elementos
+
+```> (1..10).zip((11..20))
+=> [[1, 11], [2, 12], [3, 13], [4, 14], [5, 15], [6, 16], [7, 17], [8, 18], [9,
+19], [10, 20]]
+> (1..10).zip((11..20),(21..30))
+=> [[1, 11, 21], [2, 12, 22], [3, 13, 23], [4, 14, 24], [5, 15, 25], [6, 16,
+26], [7, 17, 27], [8, 18, 28], [9, 19, 29], [10, 20, 30]]
+
+```
+
+* Também podemos usar combination:
+```
+> a = %w[john paul george ringo]
+=> ["john", "paul", "george", "ringo"]
+> a.combination(2)
+=> #<Enumerable::Enumerator:0xb7d711a0>
+> a.combination(2).to_a
+=> [["john", "paul"], ["john", "george"], ["john", "ringo"], ["paul", "george"],
+["paul", "ringo"], ["george", "ringo"]]
+a.combination(2) { |comb| puts "combinando #{comb[0]} com #{comb[1]}" }
+=> combinando john com paul
+=> combinando john com george
+=> combinando john com ringo
+=> combinando paul com george
+=> combinando paul com ringo
+=> combinando george com ringo
+
+
+```
+
+* Ou permutation:
+
+```
+> a = %w[john paul george ringo]
+=> ["john", "paul", "george", "ringo"]
+> a.permutation(2)
+=> #<Enumerable::Enumerator:0xb7ce41c4>
+> a.permutation(2).to_a
+=> [["john", "paul"], ["john", "george"], ["john", "ringo"], ["paul", "john"],
+["paul", "george"], ["paul", "ringo"], ["george", "john"], ["george", "paul"],
+["george", "ringo"], ["ringo", "john"], ["ringo", "paul"], ["ringo", "george"]]
+> a.permutation(2) { |comb| puts "combinando #{comb[0]} com #{comb[1]}" }
+=> combinando john com paul
+=> combinando john com george
+=> combinando john com ringo
+=> combinando paul com john
+=> combinando paul com george
+=> combinando paul com ringo
+=> combinando george com john
+=> combinando george com paul
+=> combinando george com ringo
+=> combinando ringo com john
+=> combinando ringo com paul
+=> combinando ringo com george
+```
+* Ou product:
+```
+> beatles = %w[john paul george ringo]
+=> ["john", "paul", "george", "ringo"]
+> stooges = %w[moe larry curly shemp]
+=> ["moe", "larry", "curly", "shemp"]
+beatles.product(stooges)
+=> [["john", "moe"], ["john", "larry"], ["john", "curly"], ["john", "shemp"],
+["paul", "moe"], ["paul", "larry"], ["paul", "curly"], ["paul", "shemp"],
+["george", "moe"], ["george", "larry"], ["george", "curly"], ["george",
+"shemp"], ["ringo", "moe"], ["ringo", "larry"], ["ringo", "curly"], ["ringo",
+"shemp"]]
+
+```
+
+## Percorrendo valores para cima e para baixo
+```
+> 1.upto(5) { |num| print num, " " }
+=> 1 2 3 4 5
+=> 1
+
+> 5.downto(1) { |num| print num, " " }
+=> 5 4 3 2 1
+=> 5
+
+> 1.step(10,2) { |num| print num, " " }
+=> 1 3 5 7 9
+=> 1
+```
+## Filtrando com o grep
+
+* Um método muito útil para coleções é o método grep (mesmo nome do utilitário de linha de
+comando - muito útil, por sinal). Podemos, por exemplo, encontrar determinadas Strings em
+um Array, no exemplo abaixo, todas as que tem comprimento entre 3 e 7 caracteres:
+
+```
+> %w[eustaquio rangel].grep(/\A\w{3,7}\z/)
+=> ["rangel"]
+
+> [1, 0, 1, 1, 0].grep(0)
+=> [0, 0]
+
+> [1, "String", 1.23, :aqui].grep(Numeric)
+=> [1, 1.23]
+
+> Array.new(10) { rand(10) }.grep(5..10).uniq
+=> [7, 5]
+
+```
+
+## Encadeamento de iteradores
+
+* Podemos encadear um iterador direto com outro. Digamos que queremos selecionar os números
+pares entre 0 e 10 e multiplicar cada um por 2. Podemos utilizar:
+
+```
+> (0..10).select { |num| num.even? }
+.map { |num| num * 2 }
+=> [0, 4, 8, 12, 16, 20]
+```
+

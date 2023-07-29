@@ -1,0 +1,1 @@
+puts 1.step(10, 2) { |num| print num, " "}
