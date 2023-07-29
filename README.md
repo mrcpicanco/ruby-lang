@@ -1551,3 +1551,22 @@ pares entre 0 e 10 e multiplicar cada um por 2. Podemos utilizar:
 => [0, 4, 8, 12, 16, 20]
 ```
 
+# Métodos
+* Podemos definir métodos facilmente em Ruby, usando def, terminando (como sempre) com
+end:
+```
+def diga_oi
+puts "Oi!"
+end
+diga_oi
+=> "Oi!"
+
+```
+
+## Dica
+```
+Podemos definir métodos curtos com a sintaxe de definição de endless methods, como
+nesse caso em que reescrevemos o método acima:
+def diga_oi = puts("oi")
+
+```
