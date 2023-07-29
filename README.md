@@ -1570,3 +1570,241 @@ nesse caso em que reescrevemos o método acima:
 def diga_oi = puts("oi")
 
 ```
+## Retornando valores
+* Podemos retornar valores de métodos com ou sem o uso de return. Quando não utilizamos
+return, o que ocorre é que a última expressão avaliada é retornada, como no exemplo:
+
+```
+def vezes(p1, p2)
+p1 * p2
+end
+puts vezes(2, 3)
+=> 6
+
+Dica
+Reescrevendo o método acima como endless method:
+def vezes(p1, p2) = p1 * p2
+
+```
+
+## Método que retorna cinco múltiplos de um determinado número:
+
+```
+def cinco_multiplos(numero)
+(1..5).map { |valor| valor * numero }
+end
+v1, v2, v3, v4, v5 = cinco_multiplos(5)
+puts "#{v1}, #{v2}, #{v3}, #{v4}, #{v5}"
+=> 5, 10, 15, 20, 25
+```
+
+## Enviando valores
+
+```
+Antes de mais nada, fica a discussão sobre a convenção sobre o que são parâmetros e o que
+são argumentos, convencionando-se à:
+Parâmetros são as variáveis situadas na assinatura de um método; Argumentos são os
+valores atribuídos aos parâmetros
+```
+* Vimos acima um exemplo simples de passagem de valores para um método, vamos ver outro
+agora:
+
+```
+def vezes(n1, n2)
+n1 * n2
+end
+puts vezes(3, 4)
+=> 12
+
+```
+
+## Métodos podem receber parâmetros _default_, como por exemplo:
+
+```
+def oi(nome = "Forasteiro")
+puts "Oi, #{nome}!"
+end
+oi("TaQ")
+=> Oi, TaQ!
+oi
+=> Oi, Forasteiro!
+```
+
+## Podemos fazer uso dos argumentos nomeados (keyword arguments), indicando que o método
+vai receber os seus valores identificados :
+```
+def mostra(a:, b:)
+puts "a é igual #{a}, b é igual #{b}"
+end
+mostra(a: 1, b: 2)
+=> a é igual 1, b é igual 2
+mostra(b: 2, a: 1)
+=> a é igual 1, b é igual 2
+
+```
+* Do modo definido acima, ambos os argumentos são obrigatórios:
+```
+mostra(b: 2)
+ArgumentError: missing keyword: a
+from (irb):1:in `mostra'
+
+```
+* Podemos também especificar valores default para eles:
+```
+def mostra(a: 1, b: 2)
+puts "a é igual #{a}, b é igual #{b}"
+end
+
+mostra(b: 2)
+=> a é igual 1, b é igual 2
+
+```
+* E também misturar com os argumentos tradicionais:
+
+```
+def mostra(a, b: 2)
+puts "a é igual #{a}, b é igual #{b}"
+end
+mostra(1, b: 2)
+=> a é igual 1, b é igual 2
+
+```
+* Importante notar que a definição do método retorna um símbolo com o nome do método, o que
+nos permite chamar ele mais tarde direto por essa referência:
+
+```
+met = def mostra(a, b: 2)
+puts "a é igual #{a}, b é igual #{b}"
+end
+send(met, 1, b: 10)
+=> a é igual 1, b é igual 10
+
+```
+
+## Enviar e processar blocos e procs
+* Como vimos com iteradores, podemos passar um bloco para um método, e para o executarmos
+dentro do método, usamos yield:
+```
+def executa_bloco(valor)
+yield(valor)
+end
+executa_bloco(2) { |valor| puts valor * valor }
+=> 4
+executa_bloco(3) { |valor| puts valor * valor }
+=> 9
+executa_bloco(4) { |valor| puts valor * valor }
+=> 16
+
+```
+* O método yield irá acionar o bloco enviado como argumento, passando no caso acima o argu-
+mento de valor para o bloco.
+Meio que primo do yield, temos o yield_self, que pega o próprio valor, executa o bloco
+enviado e retorna o último retorno do bloco:
+
+ ```
+ > 1.yield_self { |num| num + 1 }
+=> 2
+
+ ```
+
+ * Vamos pegar esse exemplo onde temos
+uma lambda para duplicar e outra para exponenciar um valor ao quadrado, onde se invertermos
+a ordem o valor ficará diferente. Queremos que o resultado final seja 16, duplicando e depois
+exponenciando o número 2. Se invertermos a ordem dos métodos, o resultado será 8. Vamos
+utilizar o yield_self para executar na ordem desejada no segundo caso:
+```
+> duplicar = -> (val) { val * 2 }
+=> #<Proc:0x000056358a8f1400 (irb):29 (lambda)>
+> quadrado = -> (val) { val ** 2 }
+=> #<Proc:0x000056358a932ef0 (irb):30 (lambda)>
+> duplicar(2)
+=> 4
+> quadrado(duplicar(2))
+=> 16
+> 2.yield_self(&duplicar).yield_self(&quadrado)
+=> 16
+
+
+> 2.then(&duplicar).then(&quadrado)
+=> 16
+
+> 2.then { |num| num * 2 }.then { |num| num ** 2 }
+=> 16
+
+O que nos evitaria código como:
+> v = 2
+=> 2
+> v = v * 2
+=> 4
+> v = v ** 2
+=> 16
+
+```
+
+```
+Dica
+Podemos utilizar pow ou o operador ** para retornar o número exponenciado:
+> 2.pow 2
+=> 4
+> 2.pow 3
+=> 8
+> 2 ** 2
+=> 4
+> 2 ** 3
+=> 8
+
+```
+
+## Valores são transmitidos por transferência
+* Como recebemos referências do objeto nos métodos, quaisquer alterações que fizermos dentro
+do método refletirão fora, como já vimos um pouco acima quando falando sobre variáveis. Vamos
+comprovar:
+```
+def altera!(valor)
+valor.upcase!
+end
+
+string = "Oi, mundo!"
+altera!(string)
+puts string
+=> "OI, MUNDO!"
+
+Lembrando que se estivermos utilizando objetos congelados, isso não vai funcionar! Os mé-
+todos que tem comportamento destrutivo, como explicado daqui a pouco, que alteram o objeto
+que foi passado como argumento, devem obedecer à convenção de utilizar um ponto de excla-
+mação (!) nos seus nomes e devemos prestar atenção tanto em não enviar objetos congelados
+para eles como nos seus efeitos colaterais (side effects) ao enviar objetos que podem ser mo-
+dificados e depois apresentar algumas "surpresinhas"não esperadas no decorrer da execução
+do código. Na verdade, qualquer tipo de objeto que possa retornar alterado de dentro de um
+método pode gerar essas "surpresinhas"e efeitos colaterais, então usem os métodos destrutivos
+de modo estritamente necessário.
+
+```
+
+## Interceptando exceções direto no método
+
+```
+def soma(valor1, valor2)
+valor1 + valor2
+rescue
+nil
+end
+puts soma(1, 2)
+=> 3
+puts soma(1, :um)
+=> nil
+
+```
+
+* Também podemos utilizar o rescue direto em um modificador de estrutura:
+
+```
+value = soma(1, nil) rescue nil
+=> nil
+
+Vale aqui lembrar que temos uma diferença de performance utilizando rescue dessa maneira,
+onde podemos utilizar o operador ternário:
+
+require 'benchmark'
+
+```
